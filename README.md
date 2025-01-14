@@ -42,6 +42,7 @@ A state-of-the-art electric vehicle (EV) fleet management system designed to rev
 - Charging station locator
 - Map visualization with saved images
 - Auto-calculation of required charging stops
+![Route](static/ev_route.png)
 
 ### 🔋 Battery Health Prediction
 Machine learning-powered analysis using Random Forest Regressor:
