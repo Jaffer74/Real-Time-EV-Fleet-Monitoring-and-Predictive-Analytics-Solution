@@ -126,16 +126,6 @@ with open('battery_health_model.pkl', 'wb') as file:
     pickle.dump(model, file)
 ```
 ---
-
-## 🌐 API Configuration
-
-```python
-# API Endpoints
-GRAPHHOPPER_BASE_URL = "https://graphhopper.com/api/1/route"
-OPEN_CHARGE_MAP_URL = "https://api.openchargemap.io/v3/poi"
-GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
-```
----
 ## 🎨 Features Details
 
 <details>
@@ -207,6 +197,17 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 </details>
 
 ---
+
+## 🌐 API Configuration
+
+```python
+# API Endpoints
+GRAPHHOPPER_BASE_URL = "https://graphhopper.com/api/1/route"
+OPEN_CHARGE_MAP_URL = "https://api.openchargemap.io/v3/poi"
+GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
+```
+---
+
 ### Steps:
 1. **Clone this repository**:
    ```bash
