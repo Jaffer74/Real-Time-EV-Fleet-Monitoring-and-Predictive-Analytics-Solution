@@ -198,3 +198,16 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 ### 📄 License
 This project is licensed under the MIT License - see the `LICENSE.md` file for details.
 ---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<div align="center">
+⭐️ Star this repo if you find it helpful!
+Made with ❤️ for the EV community
+</div>
