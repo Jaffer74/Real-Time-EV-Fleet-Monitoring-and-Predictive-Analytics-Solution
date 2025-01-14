@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Status Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: auto;
+            max-height: calc(100vh - 250px);
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: var(--card-bg);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+
+        th {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 1rem;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        tr:hover td {
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .battery-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .battery-indicator {
+            width: 60px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .battery-level {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            transition: width 0.3s ease;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #ef4444;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--card-bg) 25%, var(--border-color) 50%, var(--card-bg) 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>Vehicle Status Dashboard</h1>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle ID</th>
+                        <th>Owner Name</th>
+                        <th>Registration Number</th>
+                        <th>Battery Status</th>
+                        <th>Speed (km/h)</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicle-status">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <a href="/home" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <script>
+        function createSkeletonLoader() {
+            const tbody = document.getElementById('vehicle-status');
+            tbody.innerHTML = Array(5).fill('').map(() => `
+                <tr>
+                    <td><div class="skeleton" style="height: 20px; width: 80px;">&nbsp;</div></td>
+                    <td><div class="skeleton" style="height: 20px; width: 150px;">&nbsp;</div></td>
+                    <td><div class="skeleton" style="height: 20px; width: 120px;">&nbsp;</div></td>
+                    <td><div class="skeleton" style="height: 20px; width: 100px;">&nbsp;</div></td>
+                    <td><div class="skeleton" style="height: 20px; width: 70px;">&nbsp;</div></td>
+                </tr>
+            `).join('');
+        }
+
+        async function fetchVehicleStatus() {
+            const tbody = document.getElementById('vehicle-status');
+            createSkeletonLoader();
+
+            try {
+                const response = await fetch('/api/real_time_vehicle_status/');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const vehicles = await response.json();
+
+                if (vehicles.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="loading">No vehicles registered</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = vehicles.map(vehicle => `
+                    <tr>
+                        <td>${vehicle.vehicle_id}</td>
+                        <td>${vehicle.owner_name}</td>
+                        <td>${vehicle.registration_number}</td>
+                        <td>
+                            <div class="battery-status">
+                                <span>${vehicle.battery_status}%</span>
+                                <div class="battery-indicator">
+                                    <div class="battery-level" style="width: ${vehicle.battery_status}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${vehicle.speed} km/h</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error("Error fetching vehicle status:", error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="error">
+                            Failed to fetch vehicle data. Please try again later.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', fetchVehicleStatus);
+
+        // Refresh data every 30 seconds
+        setInterval(fetchVehicleStatus, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced EV Fleet Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #4f46e5;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --background: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        select, input {
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            min-width: 180px;
+            background: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-title {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        .chart-container {
+            height: 400px;
+            margin-top: 1rem;
+        }
+
+        .data-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-grid th,
+        .data-grid td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-grid th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .data-grid tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Advanced EV Fleet Analytics</h1>
+            <div class="header-content">
+                <div class="filters">
+                    <div class="filter-group">
+                        <select id="timeRange" onchange="updateDashboard()">
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="week">Last Week</option>
+                            <option value="month">Last Month</option>
+                            <option value="quarter">Last Quarter</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                        <select id="vehicleType" onchange="updateDashboard()">
+                            <option value="all">All Vehicles</option>
+                            <option value="sedan">Sedan Fleet</option>
+                            <option value="suv">SUV Fleet</option>
+                            <option value="van">Van Fleet</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <input type="date" id="startDate" class="date-input">
+                        <input type="date" id="endDate" class="date-input">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateDashboard()">Update Dashboard</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card metric-card">
+                <span class="metric-title">Total Energy Consumption</span>
+                <span class="metric-value" id="energyConsumption">847.2 kWh</span>
+                <span class="metric-change positive">↑ 12.3% vs last period</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-title">Average Cost per Mile</span>
+                <span class="metric-value" id="costPerMile">$0.14</span>
+                <span class="metric-change negative">↓ 5.2% vs last period</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-title">Total Operating Cost</span>
+                <span class="metric-value" id="operatingCost">$12,847</span>
+                <span class="metric-change positive">↑ 3.7% vs last period</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-title">CO₂ Emissions Saved</span>
+                <span class="metric-value" id="emissionsSaved">4.2 tons</span>
+                <span class="metric-change positive">↑ 8.4% vs last period</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Combined Cost Analysis</h2>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--primary)"></div>
+                        <span>Energy Cost</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--success)"></div>
+                        <span>Maintenance Cost</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="combinedCostChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2 class="card-title">Fleet Efficiency Comparison</h2>
+                <div class="chart-container">
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h2 class="card-title">Cost Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="costDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Vehicle Performance Details</h2>
+            <table class="data-grid">
+                <thead>
+                    <tr>
+                        <th>Vehicle ID</th>
+                        <th>Type</th>
+                        <th>Energy Used (kWh)</th>
+                        <th>Distance (mi)</th>
+                        <th>Cost ($)</th>
+                        <th>Efficiency (kWh/mi)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicleDetailsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts and data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            setDefaultDates();
+            populateVehicleDetails();
+        });
+
+        function setDefaultDates() {
+            const today = new Date();
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            
+            document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        }
+        function getCSSVariable(variable) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+        
+        }
+        function initializeCharts() {
+    // Combined Cost Chart
+    const costCtx = document.getElementById('combinedCostChart').getContext('2d');
+    window.costChart = new Chart(costCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Energy Cost',
+                data: [12000, 19000, 15000, 17000, 14000, 12847],
+                borderColor: getCSSVariable('--primary'),
+                tension: 0.4,
+                fill: false
+            },
+            {
+                label: 'Maintenance Cost',
+                data: [5000, 7000, 6000, 8000, 6500, 5900],
+                borderColor: getCSSVariable('--success'),
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            }
+        }
+    });
+
+            // Efficiency Chart
+            const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+    window.efficiencyChart = new Chart(efficiencyCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Energy Efficiency', 'Cost per Mile', 'Range', 'Charging Speed', 'Performance'],
+            datasets: [{
+                label: 'Sedan Fleet',
+                data: [90, 85, 75, 80, 85],
+                borderColor: getCSSVariable('--primary'),
+                backgroundColor: `${getCSSVariable('--primary')}33`,
+                borderWidth: 2
+            },
+            {
+                label: 'SUV Fleet',
+                data: [75, 70, 85, 75, 80],
+                borderColor: getCSSVariable('--success'),
+                backgroundColor: `${getCSSVariable('--success')}33`,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    }
+                }
+            }
+        }
+    });
+
+            // Cost Distribution Chart
+            const distributionCtx = document.getElementById('costDistributionChart').getContext('2d');
+    window.distributionChart = new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Energy', 'Maintenance', 'Insurance', 'Other'],
+            datasets: [{
+                data: [45, 25, 20, 10],
+                backgroundColor: [
+                    getCSSVariable('--primary'),
+                    getCSSVariable('--success'),
+                    getCSSVariable('--warning'),
+                    getCSSVariable('--secondary')
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
+        function populateVehicleDetails() {
+            const tbody = document.getElementById('vehicleDetailsBody');
+            const data = [
+                ['EV001', 'Sedan', 75.2, 248, 32.45, 0.303, 'Active'],
+                ['EV002', 'SUV', 68.7, 235, 29.54, 0.292, 'Charging'],
+                ['EV003', 'Van', 82.1, 262, 35.30, 0.313, 'Maintenance'],
+                ['EV004', 'Sedan', 71.5, 241, 30.75, 0.297, 'Active']
+            ];
+
+            tbody.innerHTML = data.map(row => `
+                <tr>
+                    <td>${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td>${row[2].toFixed(1)}</td>
+                    <td>${row[3]}</td>
+                    <td>${row[4].toFixed(2)}</td>
+                    <td>${row[5].toFixed(3)}</td>
+                    <td>
+                        <span style="
+                            padding: 0.25rem 0.75rem;
+                            border-radius: 9999px;
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            background-color: ${getStatusColor(row[6])};
+                            color: white;
+                        ">
+                            ${row[6]}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusColor(status) {
+                const colors = {
+                    'Active': getCSSVariable('--success'),
+                    'Charging': getCSSVariable('--warning'),
+                    'Maintenance': getCSSVariable('--danger')
+                };
+                return colors[status] || getCSSVariable('--secondary');
+            }
+
+        function updateDashboard() {
+            const timeRange = document.getElementById('timeRange').value;
+            const vehicleType = document.getElementById('vehicleType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Simulate data updates based on filters
+            const mockData = generateMockData(timeRange, vehicleType, startDate, endDate);
+            
+            // Update metrics
+            updateMetrics(mockData);
+            
+            // Update charts
+            updateCharts(mockData);
+            
+            // Update vehicle details table
+            updateVehicleDetails(mockData);
+        }
+
+        function generateMockData(timeRange, vehicleType, startDate, endDate) {
+            // Generate different data ranges based on selected time period
+            const periods = {
+                '24h': 24,
+                'week': 7,
+                'month': 30,
+                'quarter': 90,
+                'year': 365
+            };
+
+            const multiplier = vehicleType === 'all' ? 1 : 0.7;
+            const periodCount = periods[timeRange] || 30;
+
+            return {
+                energyConsumption: (Math.random() * 1000 * multiplier).toFixed(1),
+                costPerMile: (Math.random() * 0.2 * multiplier).toFixed(2),
+                operatingCost: (Math.random() * 20000 * multiplier).toFixed(0),
+                emissionsSaved: (Math.random() * 10 * multiplier).toFixed(1),
+                costTrends: Array.from({length: periodCount}, () => ({
+                    energyCost: Math.random() * 20000 * multiplier,
+                    maintenanceCost: Math.random() * 10000 * multiplier
+                })),
+                vehicles: generateVehicleData(vehicleType, periodCount)
+            };
+        }
+
+        function generateVehicleData(vehicleType, count) {
+            const vehicleTypes = vehicleType === 'all' ? ['Sedan', 'SUV', 'Van'] : [vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)];
+            const vehicles = [];
+            
+            for (let i = 0; i < count; i++) {
+                const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+                vehicles.push({
+                    id: `EV${String(i + 1).padStart(3, '0')}`,
+                    type: type,
+                    energyUsed: (Math.random() * 100 + 50).toFixed(1),
+                    distance: Math.floor(Math.random() * 100 + 200),
+                    cost: (Math.random() * 50 + 20).toFixed(2),
+                    efficiency: (Math.random() * 0.1 + 0.25).toFixed(3),
+                    status: ['Active', 'Charging', 'Maintenance'][Math.floor(Math.random() * 3)]
+                });
+            }
+            return vehicles;
+        }
+
+        function updateMetrics(data) {
+            document.getElementById('energyConsumption').textContent = `${data.energyConsumption} kWh`;
+            document.getElementById('costPerMile').textContent = `$${data.costPerMile}`;
+            document.getElementById('operatingCost').textContent = `$${data.operatingCost}`;
+            document.getElementById('emissionsSaved').textContent = `${data.emissionsSaved} tons`;
+        }
+
+        function updateCharts(data) {
+    // Update Combined Cost Chart
+    if (window.costChart) {
+        window.costChart.data.labels = data.costTrends.map((_, i) => `Day ${i + 1}`);
+        window.costChart.data.datasets[0].data = data.costTrends.map(d => d.energyCost);
+        window.costChart.data.datasets[1].data = data.costTrends.map(d => d.maintenanceCost);
+        window.costChart.update();
+    }
+
+    updateEfficiencyChart(data);
+    updateCostDistributionChart(data);
+}
+
+function updateEfficiencyChart(data) {
+    if (window.efficiencyChart) {
+        const newData = calculateEfficiencyMetrics(data);
+        window.efficiencyChart.data.datasets.forEach((dataset, index) => {
+            dataset.data = newData[index];
+        });
+        window.efficiencyChart.update();
+    }
+}
+
+        function calculateEfficiencyMetrics(data) {
+            // Calculate efficiency metrics based on vehicle data
+            return [
+                [
+                    Math.random() * 20 + 80,
+                    Math.random() * 20 + 70,
+                    Math.random() * 20 + 70,
+                    Math.random() * 20 + 75,
+                    Math.random() * 20 + 80
+                ],
+                [
+                    Math.random() * 20 + 70,
+                    Math.random() * 20 + 65,
+                    Math.random() * 20 + 80,
+                    Math.random() * 20 + 70,
+                    Math.random() * 20 + 75
+                ]
+            ];
+        }
+
+        function updateCostDistributionChart(data) {
+    if (window.distributionChart) {
+        window.distributionChart.data.datasets[0].data = [
+            Math.random() * 20 + 35,
+            Math.random() * 10 + 20,
+            Math.random() * 10 + 15,
+            Math.random() * 10 + 5
+        ];
+        window.distributionChart.update();
+    }
+}
+
+        function updateVehicleDetails(data) {
+            const tbody = document.getElementById('vehicleDetailsBody');
+            tbody.innerHTML = data.vehicles.map(vehicle => `
+                <tr>
+                    <td>${vehicle.id}</td>
+                    <td>${vehicle.type}</td>
+                    <td>${vehicle.energyUsed}</td>
+                    <td>${vehicle.distance}</td>
+                    <td>${vehicle.cost}</td>
+                    <td>${vehicle.efficiency}</td>
+                    <td>
+                        <span style="
+                            padding: 0.25rem 0.75rem;
+                            border-radius: 9999px;
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            background-color: ${getStatusColor(vehicle.status)};
+                            color: white;
+                        ">
+                            ${vehicle.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>                    

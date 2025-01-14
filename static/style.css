@@ -1,0 +1,116 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body Styling for Blue Gradient Background */
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #4b6cb7, #182848); /* Deep blue gradient for a techy feel */
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Main Container Styling */
+.container {
+  text-align: center;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.6); /* Dark semi-transparent background */
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Welcome Text */
+.welcome-text {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.highlight {
+  color: #ffcc00; /* Golden color */
+  font-weight: bold;
+}
+
+/* Form Styling */
+form {
+  margin-top: 20px;
+}
+
+form input {
+  width: 80%;
+  padding: 12px;
+  margin: 10px auto;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2); /* Slightly dark background */
+  color: white;
+  transition: all 0.3s;
+  outline: none;
+  display: block;
+}
+
+form input::placeholder {
+  color: #bbb;
+}
+
+form input:focus {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px #ffcc00;
+}
+
+/* Glowing Button Styling */
+.btn-glow {
+  display: inline-block;
+  margin: 15px auto;
+  padding: 16px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
+  border: 2px solid #ffcc00;
+  border-radius: 5px;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+  background-color: #ffcc00;
+  color: black;
+  box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+  transform: scale(1.05);
+}
+
+/* Links Styling */
+.links {
+  margin-top: 20px;
+}
+
+.links a {
+  color: #ffcc00;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.links a:hover {
+  color: #ffd700;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(-10px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}

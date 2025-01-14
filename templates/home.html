@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Charging Station Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --primary-color: #1a237e;
+            --secondary-color: #3949ab;
+            --background-color: #f5f6fa;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-links a i {
+            margin-right: 1rem;
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Quick Stats Grid */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Charts Layout */
+        .charts-container {
+            display: grid;
+            gap: 2.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            width: 100%;
+        }
+
+        /* Large Charts */
+        .chart-large {
+            grid-column: 1 / -1;
+            min-height: 300px;  /* Reduced from 400px */
+            height: auto;
+            aspect-ratio: 21/9;
+        }
+        #powerConsumptionChart {
+            max-height: 385px !important;  /* Force lower height */
+        }
+        /* Medium Charts */
+        .charts-medium {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .chart-medium {
+            min-height: 300px;
+            height: auto;
+            aspect-ratio: 16/9;
+        }
+
+        /* Small Charts */
+        .charts-small {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 2rem;
+        }
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .chart-small {
+            min-height: 180px;  /* Reduced from 200px */
+            height: auto;
+            aspect-ratio: 3/2;
+        }
+
+        /* Status Section */
+        .status-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;  /* Increased margin to separate from charts */
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Alerts Section */
+        .alerts-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert i {
+            margin-right: 0.8rem;
+        }
+
+        .alert-critical { background: rgba(244, 67, 54, 0.1); color: #d32f2f; }
+        .alert-warning { background: rgba(255, 152, 0, 0.1); color: #f57c00; }
+        .alert-info { background: rgba(33, 150, 243, 0.1); color: #1976d2; }
+
+        /* Active Sessions Table */
+        .sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .sessions-table th,
+        .sessions-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sessions-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .charts-small {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .chart-small {
+                min-height: 160px;
+            }
+            .chart-large {
+                min-height: 260px;  /* Even smaller on medium screens */
+            }
+        }
+        
+
+        @media (max-width: 1200px) {
+            .charts-medium {
+                grid-template-columns: repeat(2, 1fr);  /* Keep 2 columns longer */
+            }
+            
+            .charts-small {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .charts-small {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .chart-large {
+                min-height: 240px;  /* Adjust for smaller screens */
+                aspect-ratio: 16/9;  /* More standard ratio on smaller screens */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .charts-medium {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-small {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-small {
+                min-height: 200px;  /* Larger on mobile for better visibility */
+            }
+            .chart-large {
+                min-height: 220px;  /* Smaller on mobile */
+            }
+        }
+        .chart-wrapper h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;  /* Slightly reduced font size */
+        }
+        .chart-wrapper > canvas {
+            max-width: 100% !important;
+            max-height: 100% !important;
+        }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>EV Dashboard</h2>
+            <p>Fleet Monitoring System</p>
+        </div>
+        <nav class="nav-links">
+            <a href="#"><i class="fas fa-home"></i>Dashboard</a>
+            <a href="{{url_for('register_vehicle') }}"><i class="fas fa-car"></i>Register Vehicle</a>
+            <a href="{{url_for('vehicle_status') }}"><i class="fas fa-info-circle"></i>Vehicle Status</a>
+            <a href="{{url_for('battery_health_status') }}"><i class="fas fa-battery-full"></i>Battery Health Status</a>
+            <a href="{{url_for('route_optimization') }}"><i class="fas fa-route"></i>Optimize Routes</a>
+            <a href="{{url_for('driver_behavior_dashboard') }}"><i class="fas fa-user-tie"></i>Driver Behaviour</a>
+            <a href="{{url_for('maintenance_alert_dashboard') }}"><i class="fas fa-tools"></i>Maintenance Alerts</a>
+            <a href="{{url_for('cost_energy') }}"><i class="fas fa-chart-line"></i>Cost & Energy Consumption</a>
+            <a href="{{url_for('reportgen') }}"><i class="fas fa-file-alt"></i>Report Generation</a>
+            <a href="{{url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Dashboard Overview</h1>
+            <div class="date-time" id="current-time"></div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <i class="fas fa-bolt"></i>
+                <div class="value">1,595W</div>
+                <div class="label">Current Power</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-car-battery"></i>
+                <div class="value">85%</div>
+                <div class="label">Avg Battery Level</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-plug"></i>
+                <div class="value">8/12</div>
+                <div class="label">Active Points</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-dollar-sign"></i>
+                <div class="value">$247.32</div>
+                <div class="label">Today's Revenue</div>
+            </div>
+        </div>
+
+        <!-- Charts Container -->
+        <div class="charts-container">
+            <!-- Large Chart -->
+            <div class="chart-wrapper chart-large">
+                <h3>Power Consumption Trend</h3>
+                <canvas id="powerConsumptionChart"></canvas>
+            </div>
+
+            <!-- Medium Charts -->
+            <div class="charts-medium">
+                <div class="chart-wrapper chart-medium">
+                    <h3>Revenue Analysis</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-wrapper chart-medium">
+                    <h3>Charging Distribution</h3>
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Small Charts -->
+            <div class="charts-small">
+                <div class="chart-wrapper chart-small">
+                    <h3>Efficiency Metrics</h3>
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+                <div class="chart-wrapper chart-small">
+                    <h3>Station Health</h3>
+                    <canvas id="healthChart"></canvas>
+                </div>
+                <div class="chart-wrapper chart-small">
+                    <h3>Queue Status</h3>
+                    <canvas id="queueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="status-section">
+            <div class="status-card">
+                <h3>Active Sessions</h3>
+                <table class="sessions-table">
+                    <thead>
+                        <tr>
+                            <th>Station</th>
+                            <th>Vehicle</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CP-01</td>
+                            <td>Tesla Model 3</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="fill" style="width: 75%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CP-03</td>
+                            <td>Nissan Leaf</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="fill" style="width: 45%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="status-card">
+                <h3>Weather Impact</h3>
+                <canvas id="weatherChart"></canvas>
+            </div>
+            <div class="status-card">
+                <h3>System Alerts</h3>
+                <div class="alerts-container">
+                    <div class="alert alert-critical">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Station CP-04 requires maintenance</span>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>High load expected in 2 hours</span>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>System update scheduled</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Time Update Function
+        function updateTime() {
+            const currentTime = new Date();
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('current-time').innerText = currentTime.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Chart.js Configurations
+        const createChart = (ctx, type, data, options) => {
+            new Chart(ctx, {
+                type: type,
+                data: data,
+                options: options
+            });
+        };
+
+        // Power Consumption Chart
+        createChart(document.getElementById('powerConsumptionChart').getContext('2d'), 'line', {
+            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            datasets: [{
+                label: 'Power Consumption (kWh)',
+                data: [12, 19, 3, 5, 2, 3, 9],
+                borderColor: '#1a237e',
+                backgroundColor: 'rgba(26, 35, 126, 0.2)',
+                fill: true,
+            }]
+        }, {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2.5,  // Makes the chart wider and shorter
+            plugins: { 
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        maxTicksLimit: 6  // Reduces number of y-axis ticks
+                }   
+                }
+            }
+        });
+
+        // Revenue Chart
+        createChart(document.getElementById('revenueChart').getContext('2d'), 'bar', {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Revenue ($)',
+                data: [1200, 1500, 1800, 2000],
+                backgroundColor: '#3949ab',
+                borderColor: '#1a237e',
+                borderWidth: 1,
+            }]
+        }, {
+            responsive: true,
+            plugins: { legend: { display: true } }
+        });
+
+        // Charging Distribution Chart
+        createChart(document.getElementById('distributionChart').getContext('2d'), 'doughnut', {
+            labels: ['Tesla', 'Nissan', 'BMW', 'Others'],
+            datasets: [{
+                label: 'Vehicle Distribution',
+                data: [40, 25, 20, 15],
+                backgroundColor: ['#1a237e', '#3949ab', '#5c6bc0', '#7986cb'],
+            }]
+        }, {
+            responsive: true,
+            plugins: { legend: { display: true } }
+        });
+
+        // Efficiency Metrics Chart
+        createChart(document.getElementById('efficiencyChart').getContext('2d'), 'polarArea', {
+            labels: ['Energy Efficiency', 'Station Uptime', 'User Satisfaction'],
+            datasets: [{
+                label: 'Metrics',
+                data: [80, 90, 70],
+                backgroundColor: ['#1a237e', '#3949ab', '#5c6bc0'],
+            }]
+        }, {
+            responsive: true,
+            plugins: { legend: { display: true } }
+        });
+
+        // Station Health Chart
+        createChart(document.getElementById('healthChart').getContext('2d'), 'radar', {
+            labels: ['Station 1', 'Station 2', 'Station 3', 'Station 4'],
+            datasets: [{
+                label: 'Health Status',
+                data: [90, 85, 75, 88],
+                borderColor: '#1a237e',
+                backgroundColor: 'rgba(26, 35, 126, 0.2)',
+            }]
+        }, {
+            responsive: true,
+            plugins: { legend: { display: true } }
+        });
+
+        // Queue Status Chart
+        createChart(document.getElementById('queueChart').getContext('2d'), 'pie', {
+            labels: ['Available', 'In Use', 'Maintenance'],
+            datasets: [{
+                data: [60, 30, 10],
+                backgroundColor: ['#1a237e', '#3949ab', '#5c6bc0'],
+            }]
+        }, {
+            responsive: true,
+            plugins: { legend: { display: true } }
+        });
+
+        // Weather Impact Chart
+        createChart(document.getElementById('weatherChart').getContext('2d'), 'line', {
+            labels: ['Sunny', 'Cloudy', 'Rainy', 'Stormy'],
+            datasets: [{
+                label: 'Impact on Usage (%)',
+                data: [80, 70, 60, 50],
+                borderColor: '#3949ab',
+                backgroundColor: 'rgba(57, 73, 171, 0.2)',
+                fill: true,
+            }]
+        }, {
+            responsive: true,
+            plugins: { legend: { display: true } }
+        });
+    </script>
+</body>
+</html>

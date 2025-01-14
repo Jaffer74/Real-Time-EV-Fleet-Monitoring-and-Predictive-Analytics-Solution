@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Battery Health</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            /* Balanced Color Palette */
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --background-color: #f0f6ff;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-color: #e2e8f0;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #e0eaff 0%, #f0f6ff 100%);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            max-width: 600px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input[type="number"] {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background-color: white;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .prediction-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .prediction-result {
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .prediction-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            padding: 1rem;
+            background-color: #fee2e2;
+            border-radius: 8px;
+            color: var(--error-color);
+            margin-top: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .primary-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .secondary-button {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .secondary-button:hover {
+            background: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .optimize-routes-section {
+            margin-top: 2rem;
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .optimize-button {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .optimize-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .card {
+                margin: 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Battery Health Prediction</h2>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Enter Battery Parameters</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="#">
+                    <div class="form-group">
+                        <label for="capacity">Capacity (mAh)</label>
+                        <input type="number" id="capacity" name="capacity" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cycle_count">Cycle Count</label>
+                        <input type="number" id="cycle_count" name="cycle_count" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="voltage">Voltage (V)</label>
+                        <input type="number" id="voltage" name="voltage" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°C)</label>
+                        <input type="number" id="temperature" name="temperature" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="internal_resistance">Internal Resistance (mΩ)</label>
+                        <input type="number" id="internal_resistance" name="internal_resistance" step="0.1" required>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('home') }}" class="secondary-button">Back to Dashboard</a>
+                        <button type="submit" class="primary-button">Predict Health</button>
+                    </div>
+                </form>
+
+                {% if prediction %}
+                    <div class="prediction-section">
+                        <div class="prediction-result">
+                            <div class="prediction-value">Predicted Battery Health: {{ prediction }}%</div>
+                            <a href="{{ url_for('route_optimization') }}" class="optimize-button">
+                                Optimize Routes
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if error %}
+                    <div class="error-message">
+                        {{ error }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

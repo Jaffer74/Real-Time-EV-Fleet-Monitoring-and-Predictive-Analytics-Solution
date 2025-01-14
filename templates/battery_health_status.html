@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Battery Health Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #5e5eff;
+            --primary-dark: #4b4bcc;
+            --secondary-color: #0099cc;
+            --accent-color: #00ff95;
+            --background-dark: #1b1b2f;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --card-bg: rgba(0, 0, 0, 0.8);
+            --input-border: #444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Roboto', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, var(--background-dark), var(--primary-dark), var(--secondary-color), var(--primary-color));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+            animation: floatCard 3s ease-in-out infinite;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(94, 94, 255, 0.25);
+            background: rgba(94, 94, 255, 0.1);
+        }
+
+        .form-group input:hover {
+            border-color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .prediction-section {
+            margin-top: 2rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .prediction-result {
+            background: linear-gradient(135deg, rgba(94, 94, 255, 0.1), rgba(0, 153, 204, 0.1));
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(94, 94, 255, 0.2);
+        }
+
+        .prediction-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+            
+        }
+        .prediction-section {
+            margin-top: 2rem;
+            text-align: center;
+            opacity: 1; /* Changed from 0 to make it visible */
+            transform: translateY(0); /* Reset transform */
+            animation: fadeInUp 0.5s ease forwards;
+            display: none; /* Initially hidden */
+        }
+        .optimize-button {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--success-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .optimize-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .optimize-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .optimize-button:hover::before {
+            left: 100%;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Battery Health Prediction</h1>
+            </div>
+            <form id="batteryForm" onsubmit="return predictHealth(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="capacity">Capacity (mAh)</label>
+                        <input type="number" id="capacity" name="capacity" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cycle_count">Cycle Count</label>
+                        <input type="number" id="cycle_count" name="cycle_count" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="voltage">Voltage (V)</label>
+                        <input type="number" id="voltage" name="voltage" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°C)</label>
+                        <input type="number" id="temperature" name="temperature" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="internal_resistance">Internal Resistance (mΩ)</label>
+                        <input type="number" id="internal_resistance" name="internal_resistance" step="0.1" required>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Predict Health</button>
+                    <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </form>
+            <div id="predictionSection" class="prediction-section">
+                <div class="prediction-result">
+                    <div id="predictionValue" class="prediction-value"></div>
+        
+                </div>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function predictHealth(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const capacity = parseFloat(document.getElementById('capacity').value);
+            const cycleCount = parseInt(document.getElementById('cycle_count').value);
+            const voltage = parseFloat(document.getElementById('voltage').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const internalResistance = parseFloat(document.getElementById('internal_resistance').value);
+
+            // Simple mock prediction algorithm
+            let healthScore = 100;
+            healthScore -= (cycleCount / 500) * 20;
+            if (temperature < 20 || temperature > 30) {
+                healthScore -= Math.abs(temperature - 25) * 0.5;
+            }
+            healthScore -= Math.abs(voltage - 3.7) * 10;
+            healthScore -= (internalResistance / 100) * 5;
+            healthScore = Math.max(0, Math.min(100, healthScore));
+
+            // Display prediction
+            document.getElementById('predictionSection').style.display = 'block';
+            document.getElementById('predictionValue').textContent = `Battery Health: ${healthScore.toFixed(1)}%`;
+
+            // Add health status color
+            const predictionValue = document.getElementById('predictionValue');
+            if (healthScore >= 80) {
+                predictionValue.style.color = '#10b981';
+            } else if (healthScore >= 50) {
+                predictionValue.style.color = '#f59e0b';
+            } else {
+                predictionValue.style.color = '#ef4444';
+            }
+
+            return false;
+        }
+
+        // Function to show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Add input validation
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 0) {
+                    showError('Please enter positive values only');
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

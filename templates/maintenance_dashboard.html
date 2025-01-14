@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Vehicle Monitoring System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+         html, body {
+            height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        
+        .dashboard-container {
+            height: 100vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        .custom-gauge {
+            transition: all 0.3s ease;
+        }
+        .gauge-progress {
+            transition: stroke-dasharray 0.3s ease;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .alert {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .fixed-height-card {
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .energy-chart-container {
+            height: 300px;
+            position: relative;
+        }
+    </style>
+</head>
+<body id="mainBody" class="bg-gray-100 transition-colors duration-300">
+  <div class="min-h-screen p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-800">Vehicle Maintenance Center</h1>
+            <p class="text-gray-600">Advanced Monitoring & Diagnostics</p>
+        </div>
+        <div class="flex space-x-4">
+            <select id="vehicleSelect" class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="tesla_model_3">Tesla Model 3</option>
+                <option value="porsche_taycan">Porsche Taycan</option>
+                <option value="ford_mach_e">Ford Mach-E</option>
+            </select>
+            <button id="darkModeToggle" class="px-4 py-2 bg-gray-800 text-white rounded-lg">
+                Toggle Dark Mode
+            </button>
+            <script>
+                const toggle = document.getElementById("darkModeToggle");
+                const body = document.getElementById("mainBody");
+                toggle.addEventListener("click", () => {
+                    body.classList.toggle("dark-mode");
+                    toggle.textContent = body.classList.contains("dark-mode")
+                        ? "Light Mode"
+                        : "Dark Mode";
+                });
+            </script>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="grid grid-cols-12 gap-6">
+        <!-- Vehicle Status Card -->
+        <div class="col-span-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 id="vehicleName" class="text-3xl font-bold mb-2"></h2>
+                    <p id="vehicleType" class="text-blue-100 mb-4"></p>
+                    <div class="grid grid-cols-4 gap-6">
+                        <div class="metric-card p-4">
+                            <p class="text-sm opacity-75">Range</p>
+                            <p id="range" class="text-2xl font-bold"></p>
+                        </div>
+                        <div class="metric-card p-4">
+                            <p class="text-sm opacity-75">Efficiency</p>
+                            <p id="efficiency" class="text-2xl font-bold"></p>
+                        </div>
+                        <div class="metric-card p-4">
+                            <p class="text-sm opacity-75">Speed</p>
+                            <p id="speed" class="text-2xl font-bold"></p>
+                        </div>
+                        <div class="metric-card p-4">
+                            <p class="text-sm opacity-75">Battery</p>
+                            <p id="battery" class="text-2xl font-bold"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative flex justify-center items-center custom-gauge">
+                    <svg viewBox="0 0 100 100" class="w-32 h-32 transform -rotate-90">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#d3d3d3" stroke-width="10"></circle>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#4caf50" stroke-width="10" class="gauge-progress"
+                            style="stroke-dasharray: 141.5; stroke-dashoffset: 70.75;"></circle>
+                    </svg>
+                    <div class="absolute text-center">
+                        <span class="text-2xl font-bold">50%</span>
+                        <span class="text-sm">Efficiency</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="col-span-8 bg-white rounded-xl shadow-lg p-6 max-h-[500px] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Performance Analytics</h3>
+                <div class="flex space-x-2">
+                    <button class="chart-tab active px-4 py-2 rounded-lg" data-chart="performance">Performance</button>
+                    <button class="chart-tab px-4 py-2 rounded-lg" data-chart="efficiency">Efficiency</button>
+                    <button class="chart-tab px-4 py-2 rounded-lg" data-chart="power">Power Usage</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Alerts and Diagnostics -->
+        <div class="col-span-4 bg-white rounded-xl shadow-lg p-6 max-h-[500px] overflow-y-auto">
+            <h3 class="text-xl font-bold mb-4">Real-Time Alerts</h3>
+            <div id="alertsContainer" class="space-y-4"></div>
+        </div>
+
+        <!-- Additional Metrics -->
+        <div class="col-span-12 grid grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 fixed-height-card">
+                <h3 class="text-xl font-bold mb-4">Maintenance Schedule</h3>
+                <div id="maintenanceList" class="space-y-4"></div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 fixed-height-card">
+                <h3 class="text-xl font-bold mb-4">Energy Consumption</h3>
+                <div class="energy-chart-container">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 fixed-height-card">
+                <h3 class="text-xl font-bold mb-4">System Health</h3>
+                <div id="systemHealth" class="grid grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        // Vehicle data
+        const vehicles = {
+            tesla_model_3: {
+                name: "Tesla Model 3",
+                type: "Electric Sedan",
+                efficiency: 92,
+                range: 358,
+                avgSpeed: 65,
+                battery: 85
+            },
+            porsche_taycan: {
+                name: "Porsche Taycan",
+                type: "Electric Sports",
+                efficiency: 88,
+                range: 300,
+                avgSpeed: 78,
+                battery: 78
+            },
+            ford_mach_e: {
+                name: "Ford Mach-E",
+                type: "Electric SUV",
+                efficiency: 86,
+                range: 312,
+                avgSpeed: 70,
+                battery: 82
+            }
+        };
+
+        // Initialize charts and data
+        let mainChart;
+        let energyChart;
+        let selectedVehicle = 'tesla_model_3';
+        let darkMode = false;
+
+        // Generate random data
+        function generateData(hours = 24) {
+            return Array.from({ length: hours }, (_, i) => {
+                const hour = (new Date().getHours() - (hours - 1) + i + 24) % 24;
+                return {
+                    hour: `${hour % 12 || 12}:00 ${hour < 12 ? 'AM' : 'PM'}`,
+                    efficiency: Math.min(100, Math.random() * 20 + 80),
+                    speed: Math.random() * 30 + 50,
+                    power: Math.random() * 40 + 60,
+                    temperature: Math.random() * 30 + 60
+                };
+            });
+        }
+
+        // Update vehicle info
+        function updateVehicleInfo() {
+        const vehicle = vehicles[selectedVehicle];
+        document.getElementById('vehicleName').textContent = vehicle.name;
+        document.getElementById('vehicleType').textContent = vehicle.type;
+        document.getElementById('range').textContent = `${vehicle.range.toFixed(1)} mi`;
+        document.getElementById('efficiency').textContent = `${vehicle.efficiency.toFixed(0)}%`;
+        document.getElementById('speed').textContent = `${vehicle.avgSpeed.toFixed(1)} mph`;
+        document.getElementById('battery').textContent = `${vehicle.battery.toFixed(1)}%`;
+        updateGauge(vehicle.efficiency);
+    }
+
+        // Create custom gauge
+        function updateGauge(value) {
+            const gaugeContainer = document.querySelector('.custom-gauge');
+            gaugeContainer.innerHTML = `
+                <svg viewBox="0 0 100 100" class="w-32 h-32 transform -rotate-90">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ffffff33" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ffffff" stroke-width="10"
+                        class="gauge-progress"
+                        style="stroke-dasharray: ${value * 2.83} 283"/>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-2xl font-bold">${value}%</span>
+                    <span class="text-sm">Health</span>
+                </div>
+            `;
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            const energyCtx = document.getElementById('energyChart').getContext('2d');
+            const data = generateData();
+
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.hour),
+                    datasets: [{
+                        label: 'Speed (mph)',
+                        data: data.map(d => d.speed),
+                        borderColor: '#2196F3',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Speed (mph)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                stepSize: 20
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            energyChart = new Chart(energyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Driving', 'Climate', 'Electronics', 'Other'],
+                    datasets: [{
+                        data: [45, 20, 25, 10],
+                        backgroundColor: [
+                            'rgba(33, 150, 243, 0.8)',   // Driving - brighter blue
+                            'rgba(76, 175, 80, 0.8)',    // Climate - brighter green
+                            'rgba(255, 152, 0, 0.8)',    // Electronics - brighter orange
+                            'rgba(156, 39, 176, 0.8)'    // Other - brighter purple
+                        ],
+                        borderWidth: 2,
+                        borderColor: darkMode ? '#1a1a1a' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => ({
+                                        text: `${label} (${data.datasets[0].data[i]}%)`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        strokeStyle: data.datasets[0].borderColor,
+                                        lineWidth: data.datasets[0].borderWidth,
+                                        hidden: isNaN(data.datasets[0].data[i])
+                                    }));
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Energy Distribution',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Generate and display alerts
+        function generateAlerts() {
+            const alertsContainer = document.getElementById('alertsContainer');
+            const alerts = [
+                { type: 'warning', message: 'Rapid acceleration detected', time: '2 mins ago' },
+                { type: 'success', message: 'Optimal charging completed', time: '15 mins ago' },
+                { type: 'error', message: 'Hard braking incident', time: '1 hour ago' }
+            ];
+
+            alertsContainer.innerHTML = alerts.map(alert => `
+                <div class="alert p-4 rounded-lg ${alert.type === 'error' ? 'bg-red-100 text-red-800' : 
+                    alert.type === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="font-semibold">${alert.message}</p>
+                            <p class="text-sm opacity-75">${alert.time}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Generate maintenance schedule
+        function generateMaintenanceSchedule() {
+            const maintenanceList = document.getElementById('maintenanceList');
+            const tasks = fetchMaintenanceData();
+            
+            function fetchMaintenanceData() {
+                return [
+                    { task: 'Tire Rotation', due: '3 days', status: 'pending' },
+                    { task: 'Battery Check', due: '2 weeks', status: 'upcoming' },
+                    { task: 'Firmware Update', due: 'Now', status: 'ready' }
+                ];
+            }   
+
+
+            maintenanceList.innerHTML = tasks.map(task => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-semibold">${task.task}</p>
+                        <p class="text-sm text-gray-600">Due: ${task.due}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-sm ${
+                        task.status === 'ready' ? 'bg-green-100 text-green-800' :
+                        task.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
+                    }">${task.status}</span>
+                </div>
+            `).join('');
+        }
+
+        // Generate system health metrics
+        function generateSystemHealth() {
+            const systemHealth = document.getElementById('systemHealth');
+            const metrics = [
+                { name: 'Battery Health', value: '95%' },
+                { name: 'Tire Pressure', value: 'Optimal' },
+                { name: 'Brake Wear', value: '87%' },
+                { name: 'Motor Temp', value: '65°C' }
+            ];
+
+            systemHealth.innerHTML = metrics.map(metric => `
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-600">${metric.name}</p>
+                    <p class="text-lg font-semibold">${metric.value}</p>
+                </div>
+            `).join('');
+        }
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateVehicleInfo();
+            initializeCharts();
+            generateAlerts();
+            generateMaintenanceSchedule();
+            generateSystemHealth();
+
+            // Set up event listeners
+            document.getElementById('vehicleSelect').addEventListener('change', (e) => {
+                selectedVehicle = e.target.value;
+                updateVehicleInfo();
+                const data = generateData();
+                updateChartData(data);
+            });
+
+            document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+
+            // Chart tab switching
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active', 'bg-blue-500', 'text-white'));
+                    e.target.classList.add('active', 'bg-blue-500', 'text-white');
+                    updateChartType(e.target.dataset.chart);
+                });
+            });
+
+            // Set up real-time updates
+            setInterval(() => {
+                updateRealTimeData();
+            }, 5000);
+        }
+
+        // Update chart data based on type
+        function updateChartType(chartType) {
+            const data = generateData();
+            let dataset = {
+                performance: {
+                    label: 'Speed (mph)',
+                    data: data.map(d => d.speed),
+                    borderColor: '#2196F3'
+                },
+                efficiency: {
+                    label: 'Efficiency (%)',
+                    data: data.map(d => d.efficiency),
+                    borderColor: '#4CAF50'
+                },
+                power: {
+                    label: 'Power Usage (kW)',
+                    data: data.map(d => d.power),
+                    borderColor: '#FF9800'
+                }
+            }[chartType];
+
+            mainChart.data.datasets = [{
+                ...dataset,
+                tension: 0.4,
+                fill: false
+            }];
+            mainChart.update();
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+            updateChartsTheme();
+            updateComponentsTheme();
+        }
+
+        // Update charts theme based on dark mode
+        function updateChartsTheme() {
+            const theme = {
+                color: darkMode ? '#ffffff' : '#666666',
+                gridColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+            };
+
+            [mainChart, energyChart].forEach(chart => {
+                if (chart) {
+                    chart.options.scales = {
+                        ...chart.options.scales,
+                        x: {
+                            ...chart.options.scales.x,
+                            grid: { color: theme.gridColor },
+                            ticks: { color: theme.color }
+                        },
+                        y: {
+                            ...chart.options.scales.y,
+                            grid: { color: theme.gridColor },
+                            ticks: { color: theme.color }
+                        }
+                    };
+                    chart.options.plugins.legend.labels.color = theme.color;
+                    chart.update();
+                }
+            });
+        }
+
+        // Update components theme
+        function updateComponentsTheme() {
+            const cards = document.querySelectorAll('.bg-white');
+            cards.forEach(card => {
+                card.classList.toggle('bg-gray-800');
+                card.classList.toggle('bg-white');
+            });
+        }
+
+        // Simulate real-time data updates
+        function updateRealTimeData() {
+            // Update vehicle metrics
+            const vehicle = vehicles[selectedVehicle];
+            vehicle.battery = Math.max(0, Math.min(100, vehicle.battery + (Math.random() - 0.5) * 5));
+            vehicle.avgSpeed = Math.max(0, Math.min(120, vehicle.avgSpeed + (Math.random() - 0.5) * 10));
+            vehicle.range = Math.max(0, Math.min(400, vehicle.range + (Math.random() - 0.5) * 20));
+            updateVehicleInfo();
+
+            // Update charts with new data
+            const currentHour = new Date().getHours();
+            const newTimeLabel = `${currentHour % 12 || 12}:00 ${currentHour < 12 ? 'AM' : 'PM'}`;
+    
+            mainChart.data.labels.push(newTimeLabel);
+            mainChart.data.labels.shift();
+            mainChart.data.datasets[0].data.push(Math.random() * 30 + 50);
+            mainChart.data.datasets[0].data.shift();
+            mainChart.update();
+
+            // Add random new alerts
+            if (Math.random() > 0.7) {
+                const alertTypes = ['warning', 'success', 'error'];
+                const alertMessages = [
+                    'Unusual acceleration pattern detected',
+                    'Battery optimization completed',
+                    'Tire pressure alert',
+                    'Scheduled maintenance due',
+                    'Software update available'
+                ];
+                const newAlert = {
+                    type: alertTypes[Math.floor(Math.random() * alertTypes.length)],
+                    message: alertMessages[Math.floor(Math.random() * alertMessages.length)],
+                    time: 'Just now'
+                };
+                const alertsContainer = document.getElementById('alertsContainer');
+                const alertElement = document.createElement('div');
+                alertElement.className = `alert p-4 rounded-lg ${
+                    newAlert.type === 'error' ? 'bg-red-100 text-red-800' :
+                    newAlert.type === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                }`;
+                alertElement.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="font-semibold">${newAlert.message}</p>
+                            <p class="text-sm opacity-75">${newAlert.time}</p>
+                        </div>
+                    </div>
+                `;
+                alertsContainer.insertBefore(alertElement, alertsContainer.firstChild);
+                if (alertsContainer.children.length > 5) {
+                    alertsContainer.lastChild.remove();
+                }
+            }
+
+            // Update system health metrics randomly
+            updateSystemHealthMetrics();
+        }
+
+        // Update system health metrics
+        function updateSystemHealthMetrics() {
+            const metrics = [
+                { name: 'Battery Health', value: `${Math.floor(90 + Math.random() * 10)}%` },
+                { name: 'Tire Pressure', value: `${Math.floor(32 + Math.random() * 2)} PSI` },
+                { name: 'Brake Wear', value: `${Math.floor(85 + Math.random() * 15)}%` },
+                { name: 'Motor Temp', value: `${Math.floor(60 + Math.random() * 10)}°C` }
+            ];
+
+            const systemHealth = document.getElementById('systemHealth');
+            systemHealth.innerHTML = metrics.map(metric => `
+                <div class="p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg">
+                    <p class="text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}">${metric.name}</p>
+                    <p class="text-lg font-semibold">${metric.value}</p>
+                </div>
+            `).join('');
+        }
+
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // After fetching data or updating content
+        window.scrollTo(0, 0); // Reset scroll position
+
+    </script>
+</body>
+</html>

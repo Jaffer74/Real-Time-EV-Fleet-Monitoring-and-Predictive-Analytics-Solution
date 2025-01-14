@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Behavior Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            background: #0f172a;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .chart-container:hover {
+            transform: scale(1.02);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-good { background: #10B981; }
+        .status-warning { background: #F59E0B; }
+        .status-critical { background: #EF4444; }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .driver-score {
+            font-size: 48px;
+            background: linear-gradient(45deg, #60A5FA, #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .animated-bg {
+            background: linear-gradient(-45deg, #1e3c72, #2a5298, #1e3c72);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .alert-card {
+            animation: slideIn 0.5s ease-out;
+            border-left: 4px solid;
+        }
+
+        .alert-card.warning { border-color: #F59E0B; }
+        .alert-card.danger { border-color: #EF4444; }
+        .alert-card.success { border-color: #10B981; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .metric-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        #behavior3D {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen p-6">
+    <div class="container mx-auto">
+        <!-- Header Section -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Driver Behavior Analytics
+                </h1>
+                <p class="text-gray-400">Advanced Performance Monitoring System</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <select id="timeRange" class="bg-gray-800 rounded-lg px-4 py-2 border border-gray-700">
+                    <option value="day">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+                <button id="refreshData" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                    Refresh Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Driver Score Card -->
+            <div class="col-span-4 glassmorphism rounded-xl p-6 card-hover">
+                <h3 class="text-xl font-semibold mb-4">Driver Score</h3>
+                <div class="flex items-center justify-between">
+                    <div class="driver-score" id="driverScore">92</div>
+                    <div id="scoreGauge" class="w-24 h-24"></div>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-sm text-gray-400">Safety</div>
+                        <div class="text-lg font-semibold">95%</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-400">Efficiency</div>
+                        <div class="text-lg font-semibold">88%</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-400">Compliance</div>
+                        <div class="text-lg font-semibold">93%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Metrics -->
+            <div class="col-span-8 glassmorphism rounded-xl p-6">
+                <h3 class="text-xl font-semibold mb-4">Real-time Metrics</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="metric-card">
+                        <div class="text-sm text-gray-400">Current Speed</div>
+                        <div class="text-2xl font-bold" id="currentSpeed">65 mph</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-sm text-gray-400">Acceleration</div>
+                        <div class="text-2xl font-bold" id="acceleration">+2.3 m/s²</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-sm text-gray-400">Braking Force</div>
+                        <div class="text-2xl font-bold" id="brakingForce">-1.8 m/s²</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="text-sm text-gray-400">G-Force</div>
+                        <div class="text-2xl font-bold" id="gForce">0.3 G</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Charts -->
+            <div class="col-span-8 glassmorphism rounded-xl p-6">
+              <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-xl font-semibold">Performance Analysis</h3>
+                  <div class="flex space-x-2">
+                      <button class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600" onclick="changeChart('speed')">Speed</button>
+                      <button class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600" onclick="changeChart('acceleration')">Acceleration</button>
+                      <button class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600" onclick="changeChart('braking')">Braking</button>
+                  </div>
+              </div>
+              <div class="chart-container h-64 w-full">
+                  <canvas id="performanceChart"></canvas>
+              </div>
+          </div>
+          
+
+            <!-- Behavior Patterns -->
+            <div class="col-span-4 glassmorphism rounded-xl p-6">
+                <h3 class="text-xl font-semibold mb-4">Behavior Patterns</h3>
+                <div id="behavior3D"></div>
+                <div class="mt-4 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span>Smooth Driving</span>
+                        <div class="w-32 bg-gray-700 rounded-full h-2">
+                            <div class="bg-green-500 rounded-full h-2" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Corner Handling</span>
+                        <div class="w-32 bg-gray-700 rounded-full h-2">
+                            <div class="bg-yellow-500 rounded-full h-2" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Speed Management</span>
+                        <div class="w-32 bg-gray-700 rounded-full h-2">
+                            <div class="bg-blue-500 rounded-full h-2" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Events -->
+            <div class="col-span-12 glassmorphism rounded-xl p-6">
+                <h3 class="text-xl font-semibold mb-4">Recent Events</h3>
+                <div id="eventsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Events will be dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Three.js visualization
+        function initBehavior3D() {
+            const container = document.getElementById('behavior3D');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create visualization elements
+            const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0x60A5FA,
+                emissive: 0x072A60,
+                side: THREE.DoubleSide,
+                flatShading: true
+            });
+            const torusKnot = new THREE.Mesh(geometry, material);
+            
+            scene.add(torusKnot);
+
+            // Add lights
+            const light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(10, 10, 10);
+            scene.add(light);
+
+            camera.position.z = 30;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                torusKnot.rotation.x += 0.01;
+                torusKnot.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        // Initialize performance chart
+        let performanceChart;
+        function initPerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => i + ':00'),
+                    datasets: [{
+                        label: 'Speed (mph)',
+                        data: Array.from({length: 24}, () => Math.random() * 30 + 50),
+                        borderColor: '#60A5FA',
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#fff'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#fff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate and update events
+        function updateEvents() {
+            const events = [
+                { type: 'warning', title: 'Rapid Acceleration', time: '2 mins ago', description: 'Acceleration exceeded normal parameters' },
+                { type: 'success', title: 'Efficient Route', time: '15 mins ago', description: 'Optimal route selection saved 10% fuel' },
+                { type: 'danger', title: 'Hard Braking', time: '1 hour ago', description: 'Sudden brake application detected' }
+            ];
+
+            const container = document.getElementById('eventsContainer');
+            container.innerHTML = '';
+
+            events.forEach((event, index) => {
+                const card = document.createElement('div');
+                card.className = `alert-card ${event.type} bg-gray-800 p-4 rounded-lg transition-transform transform`;
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-betweenmb-2">
+                        <span class="font-bold text-lg">${event.title}</span>
+                        <span class="text-sm text-gray-400">${event.time}</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">${event.description}</p>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', updateEvents);
+
+        // Update metrics in real-time
+        function updateMetrics() {
+            const metrics = {
+                speed: Math.floor(Math.random() * 30 + 50),
+                acceleration: (Math.random() * 4 - 2).toFixed(1),
+                braking: (Math.random() * -3).toFixed(1),
+                gForce: (Math.random() * 0.8).toFixed(1)
+            };
+
+            document.getElementById('currentSpeed').textContent = `${metrics.speed} mph`;
+            document.getElementById('acceleration').textContent = `${metrics.acceleration} m/s²`;
+            document.getElementById('brakingForce').textContent = `${metrics.braking} m/s²`;
+            document.getElementById('gForce').textContent = `${metrics.gForce} G`;
+
+            // Animate changes
+            gsap.from([
+                '#currentSpeed',
+                '#acceleration',
+                '#brakingForce',
+                '#gForce'
+            ], {
+                scale: 1.1,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        }
+
+        // Change chart data based on selected metric
+        function changeChart(metric) {
+            const datasets = {
+                speed: {
+                    label: 'Speed (mph)',
+                    color: '#60A5FA'
+                },
+                acceleration: {
+                    label: 'Acceleration (m/s²)',
+                    color: '#34D399'
+                },
+                braking: {
+                    label: 'Braking Force (m/s²)',
+                    color: '#F87171'
+                }
+            };
+
+            const selected = datasets[metric];
+            performanceChart.data.datasets[0].label = selected.label;
+            performanceChart.data.datasets[0].borderColor = selected.color;
+            performanceChart.data.datasets[0].backgroundColor = `${selected.color}20`;
+            performanceChart.data.datasets[0].data = Array.from(
+                {length: 24}, 
+                () => Math.random() * 30 + 50
+            );
+            performanceChart.update();
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            initBehavior3D();
+            initPerformanceChart();
+            updateEvents();
+            updateMetrics();
+
+            // Set up real-time updates
+            setInterval(() => {
+                updateMetrics();
+                updateEvents();
+            }, 5000);
+
+            // Add refresh button functionality
+            document.getElementById('refreshData').addEventListener('click', () => {
+                updateMetrics();
+                updateEvents();
+                changeChart('speed');
+            });
+
+            // Add time range change handler
+            document.getElementById('timeRange').addEventListener('change', (e) => {
+                const range = e.target.value;
+                // Update chart data based on selected time range
+                const dataPoints = range === 'day' ? 24 : 
+                                 range === 'week' ? 7 : 30;
+                performanceChart.data.labels = Array.from(
+                    {length: dataPoints}, 
+                    (_, i) => range === 'day' ? `${i}:00` : 
+                             range === 'week' ? `Day ${i+1}` : `Day ${i+1}`
+                );
+                changeChart('speed');
+            });
+        }
+
+        // Start the dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>

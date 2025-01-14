@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        /* Existing CSS */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Arial', sans-serif;
+          background: linear-gradient(135deg, #4b6cb7, #182848);
+          color: white;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          animation: fadeIn 1s ease-in-out;
+        }
+
+        .container {
+          text-align: center;
+          padding: 40px;
+          background: rgba(0, 0, 0, 0.6);
+          border-radius: 15px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .welcome-text {
+          font-size: 3rem;
+          margin-bottom: 20px;
+        }
+
+        .highlight {
+          color: #ffcc00;
+          font-weight: bold;
+        }
+
+        form {
+          margin-top: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        form input {
+          width: 80%;
+          padding: 12px;
+          margin: 15px 0;
+          font-size: 1rem;
+          border: none;
+          border-radius: 5px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          transition: all 0.3s;
+          outline: none;
+        }
+
+        form input::placeholder {
+          color: #bbb;
+        }
+
+        form input:focus {
+          background: rgba(255, 255, 255, 0.3);
+          box-shadow: 0 0 10px #ffcc00;
+        }
+
+        .btn-glow {
+          display: inline-block;
+          margin: 15px auto;
+          padding: 16px 30px;
+          font-size: 1.2rem;
+          font-weight: bold;
+          text-decoration: none;
+          color: white;
+          border: 2px solid #ffcc00;
+          border-radius: 5px;
+          background: transparent;
+          transition: all 0.3s ease;
+        }
+
+        .btn-glow:hover {
+          background-color: #ffcc00;
+          color: black;
+          box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+          transform: scale(1.05);
+        }
+
+        .error-message {
+          color: #ff3333;
+          font-size: 1rem;
+          margin: 10px 0;
+        }
+
+        @keyframes fadeIn {
+          from {
+              opacity: 0;
+              transform: translateY(-10px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+        }
+
+        /* New Validation CSS */
+        .form-group {
+          position: relative;
+          width: 80%;
+          margin: 15px 0;
+          margin-bottom: 35px;
+        }
+
+        .validation-message {
+          position: absolute;
+          left: 0;
+          bottom: -25px;
+          font-size: 0.8rem;
+          color: #ff3333;
+          text-align: left;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          white-space: nowrap;
+        }
+
+        input:invalid[focused="true"] {
+          border: 2px solid #ff3333;
+        }
+
+        input:invalid[focused="true"] ~ .validation-message {
+          opacity: 1;
+        }
+
+        input:valid[focused="true"] {
+          border: 2px solid #00ff00;
+        }
+
+        .password-strength {
+          width: 100%;
+          height: 4px;
+          background: #444;
+          margin-top: 5px;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+
+        .password-strength-bar {
+          height: 100%;
+          width: 0;
+          transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .strength-weak { background-color: #ff3333; width: 33.33%; }
+        .strength-medium { background-color: #ffa500; width: 66.66%; }
+        .strength-strong { background-color: #00ff00; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="welcome-text">
+            Register to <span class="highlight">EV Management</span>
+        </h1>
+
+        <form id="registrationForm" action="/register" method="POST" novalidate>
+            <div class="form-group">
+                <input type="text" name="username" id="username" placeholder="Username" 
+                       pattern="^[a-zA-Z0-9]{4,20}$" required>
+                <span class="validation-message">Username must be 4-20 characters long and contain only letters and numbers</span>
+            </div>
+
+            <div class="form-group">
+                <input type="email" name="email" id="email" placeholder="Email" required>
+                <span class="validation-message">Please enter a valid email address</span>
+            </div>
+
+            <div class="form-group">
+                <input type="password" name="password" id="password" 
+                       placeholder="Password" 
+                       pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" 
+                       required>
+                <div class="password-strength">
+                    <div class="password-strength-bar"></div>
+                </div>
+                <span class="validation-message">Password must be at least 8 characters long, include a number, letter, and special character</span>
+            </div>
+
+            <div class="form-group">
+                <input type="password" name="confirm_password" id="confirm_password" 
+                       placeholder="Confirm Password" required>
+                <span class="validation-message">Passwords do not match</span>
+            </div>
+
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+
+            <button type="submit" class="btn-glow">Register</button>
+        </form>
+        
+        <p class="links">
+            Already have an account? <a href="{{ url_for('login') }}" class="highlight">Login here</a>
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registrationForm');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            const passwordStrengthBar = document.querySelector('.password-strength-bar');
+
+            // Add focused attribute when input is focused
+            const inputs = form.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.setAttribute('focused', 'true');
+                });
+            });
+
+            // Password strength indicator
+            password.addEventListener('input', function() {
+                const value = this.value;
+                let strength = 0;
+                
+                if(value.length >= 8) strength++;
+                if(value.match(/[A-Z]/)) strength++;
+                if(value.match(/[0-9]/)) strength++;
+                if(value.match(/[^A-Za-z0-9]/)) strength++;
+
+                passwordStrengthBar.className = 'password-strength-bar';
+                if(strength >= 4) {
+                    passwordStrengthBar.classList.add('strength-strong');
+                } else if(strength >= 2) {
+                    passwordStrengthBar.classList.add('strength-medium');
+                } else if(strength >= 1) {
+                    passwordStrengthBar.classList.add('strength-weak');
+                }
+            });
+
+            // Password match validation
+            confirmPassword.addEventListener('input', function() {
+                if(this.value !== password.value) {
+                    this.setCustomValidity('Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                inputs.forEach(input => {
+                    if(!input.validity.valid) {
+                        input.setAttribute('focused', 'true');
+                        isValid = false;
+                    }
+                });
+
+                if(!isValid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

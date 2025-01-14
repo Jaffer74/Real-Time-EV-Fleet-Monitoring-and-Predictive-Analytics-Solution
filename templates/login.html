@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EV Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+       /* Form validation CSS */
+       input:invalid {
+            border: 2px solid red;
+        }
+
+        input:valid {
+            border: 2px solid green;
+        }
+
+        .validation-message {
+            color: red;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .validation-message.valid {
+            color: green;
+        } 
+    </style>
+</head>
+<body>
+    <!-- Main Container with Blue Gradient Background -->
+    <div class="container">
+        <h1 class="welcome-text">
+            Login to <span class="highlight">EV Management</span>
+        </h1>
+        
+        <!-- Login Form -->
+        <form id="loginForm" method="POST" action="{{ url_for('login') }}" novalidate>
+            <input id="email" type="email" name="email" placeholder="Enter your email" required>
+            <div class="validation-message" id="emailValidation"></div>
+            
+            <input id="password" type="password" name="password" placeholder="Enter your password" required minlength="6">
+            <div class="validation-message" id="passwordValidation"></div>
+            
+            <button type="submit" class="btn-glow">Login</button>
+        </form>
+        {% if error %}
+        <div class="error" style="color: red; margin-top: 10px;">{{ error }}</div>
+        {% endif %}
+        <!-- Link to Registration Page -->
+        <div class="links">
+            <a href="{{ url_for('register') }}" class="link-text">Don't have an account? Register here</a>
+        </div>
+    </div>
+
+    <script>
+        // Form validation script
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const emailValidation = document.getElementById('emailValidation');
+        const passwordValidation = document.getElementById('passwordValidation');
+
+        loginForm.addEventListener('submit', function (e) {
+            let isValid = true;
+
+            // Email validation
+            if (!emailInput.checkValidity()) {
+                emailValidation.textContent = 'Please enter a valid email address.';
+                isValid = false;
+            } else {
+                emailValidation.textContent = 'Email looks good!';
+                emailValidation.classList.add('valid');
+            }
+
+            // Password validation
+            if (!passwordInput.checkValidity()) {
+                passwordValidation.textContent = 'Password must be at least 6 characters.';
+                isValid = false;
+            } else {
+                passwordValidation.textContent = 'Password looks good!';
+                passwordValidation.classList.add('valid');
+            }
+
+            // Prevent form submission if validation fails
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        // Clear validation messages on input change
+        emailInput.addEventListener('input', () => {
+            emailValidation.textContent = '';
+        });
+
+        passwordInput.addEventListener('input', () => {
+            passwordValidation.textContent = '';
+        });
+    </script>
+</body>
+</html>
