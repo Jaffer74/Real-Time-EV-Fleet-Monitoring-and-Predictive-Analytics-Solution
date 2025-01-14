@@ -2,7 +2,9 @@
 
 A state-of-the-art electric vehicle (EV) fleet management system designed to revolutionize how fleet managers monitor, analyze, and optimize their electric vehicle operations. Built with modern web technologies and powered by machine learning. 🌟
 ---
-![Dashboard](static/route_optimization_image.jpg)
+![Dashboard](static/ev_dashboard.png)
+![Dashboard](static/ev_dashboard1.png)
+![Dashboard](static/ev_dashboard2.png)
 
 ## 📑 Table of Contents
 - [Features](#features)
