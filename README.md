@@ -129,7 +129,7 @@ with open('battery_health_model.pkl', 'wb') as file:
 ## 🎨 Features Details
 
 <details>
-<summary>View Detailed Feature Information</summary>
+<summary>View Detailed Feature Information(Click the down arrow !!)</summary>
 
 ### Cost & Energy Dashboard
 - Total Energy Consumption tracking
