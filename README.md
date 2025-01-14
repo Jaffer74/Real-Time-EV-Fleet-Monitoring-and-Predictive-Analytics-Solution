@@ -210,6 +210,8 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 
 ### Total Reports Generated
 - Displays the total number of reports generated.
+![Report](static/ev_report3.png)
+![Report](static/ev_report1.png)
 
 ### Downloaded Reports History
 | Date & Time | Vehicle | Report Type | Status (Success/Failure) | Action (Download Link) |
@@ -218,9 +220,7 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 
 ### Save Reports as PDF
 - The generated reports are saved in PDF format, which can be downloaded from the history section.
-![Report](static/ev_report3.png)
-![Report](static/ev_report1.png)
-- Below is the pdf generated and saved Image.
+- This is the pdf generated Structure👇
 ![Report](static/ev_report2.png)
 
 ### Class Diagram
