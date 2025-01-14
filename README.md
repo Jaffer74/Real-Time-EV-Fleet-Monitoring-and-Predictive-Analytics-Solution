@@ -126,31 +126,7 @@ with open('battery_health_model.pkl', 'wb') as file:
     pickle.dump(model, file)
 ```
 ---
-### Steps:
-1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/Jaffer74/Real-Time-EV-Fleet-Monitoring-and-Predictive-Analytics-Solution.git cd Real-Time-EV-Fleet-Monitoring-and-Predictive-Analytics-Solution
-   ```
 
-
-2. Set Up Python Virtual Environment:
-    ```bash 
-   python -m venv venv source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-   
-3. Install Dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-View the `requirements.txt` file [here](https://github.com/Jaffer74/Real-Time-EV-Fleet-Monitoring-and-Predictive-Analytics-Solution/blob/main/requirements.txt).
-
-
-5. Run the Application:
-   ```bash
-   python app.py
-   ```
-
----
 ## 🌐 API Configuration
 
 ```python
@@ -229,6 +205,31 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 
 ![Class Diagram](static/ev_class_diagram.png)
 </details>
+
+---
+### Steps:
+1. **Clone this repository**:
+   ```bash
+   git clone https://github.com/Jaffer74/Real-Time-EV-Fleet-Monitoring-and-Predictive-Analytics-Solution.git cd Real-Time-EV-Fleet-Monitoring-and-Predictive-Analytics-Solution
+   ```
+
+
+2. Set Up Python Virtual Environment:
+    ```bash 
+   python -m venv venv source venv/bin/activate  # On Windows: venv\Scripts\activate
+    ```
+   
+3. Install Dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+View the `requirements.txt` file [here](https://github.com/Jaffer74/Real-Time-EV-Fleet-Monitoring-and-Predictive-Analytics-Solution/blob/main/requirements.txt).
+
+
+5. Run the Application:
+   ```bash
+   python app.py
+   ```
 
 ---
 ### 📄 License
