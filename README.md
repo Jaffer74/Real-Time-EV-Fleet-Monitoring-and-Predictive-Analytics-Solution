@@ -25,13 +25,15 @@ A state-of-the-art electric vehicle (EV) fleet management system designed to rev
 - Secure login/registration system with email verification
 - Role-based access (Fleet Managers & Drivers)
 - Session management & secure authentication
-![Dashboard](static/ev_login.png)
-![Dashboard](static/ev_registration.png)
+![Login](static/ev_login.png)
+![Login](static/ev_registration.png)
 
 ### 🚙 Vehicle Registration & Monitoring
 - Comprehensive vehicle registration system
 - Real-time status tracking
 - Interactive dashboard with live updates
+![Vechicle](static/ev_vehicle_reg.png)
+![Vehicle](static/ev_vehicle_status.png)
 
 ### 🗺️ Smart Route Optimization
 - Intelligent route planning with charging stops
