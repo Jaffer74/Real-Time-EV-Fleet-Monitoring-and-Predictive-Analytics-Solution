@@ -150,14 +150,6 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 
 <details>
 <summary>View Detailed Feature Information</summary>
-### Route Optimization
-- Intelligent route planning with charging stops
-- Calculates how many times the vehicle should stop to reach the destination and charge based on input parameters (battery level, distance, charging station locations, etc.)
-- Real-time tracking of route adjustments as battery levels change
-- Charging station locator with real-time updates
-- Displays dynamic routes and charging stop recommendations with images saved inside the `static` folder for visual reference
-
-![Route Optimization](static/route_optimization_image.jpg)
 
 ### Cost & Energy Dashboard
 - Total Energy Consumption tracking
@@ -166,6 +158,15 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 - Fleet Efficiency Comparison
 
 ![Cost & Energy Dashboard](link-to-image)
+
+### Route Optimization
+- Intelligent route planning with charging stops
+- Calculates how many times the vehicle should stop to reach the destination and charge based on input parameters (battery level, distance, charging station locations, etc.)
+- Real-time tracking of route adjustments as battery levels change
+- Charging station locator with real-time updates
+- Displays dynamic routes and charging stop recommendations with images saved inside the `static` folder for visual reference
+
+![Route Optimization](static/route_optimization_image.jpg)
 
 ### Driver Maintenance
 - Real-time Driver Score
