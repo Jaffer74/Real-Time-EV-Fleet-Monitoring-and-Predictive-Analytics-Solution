@@ -183,7 +183,7 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 - Efficiency Tracking (88%)
 - Compliance Monitoring (93%)
 
-![Driver Maintenance](link-to-image)
+![Driver Maintenance](static/driver.png)
 
 ### Vehicle Monitoring
 - Current Power Usage
