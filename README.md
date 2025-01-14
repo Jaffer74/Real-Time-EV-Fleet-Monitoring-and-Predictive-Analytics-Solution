@@ -165,8 +165,8 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 - CO₂ Emissions Saved calculation
 - Fleet Efficiency Comparison
 
-![Cost & Energy Dashboard](ev_cost.png)
-![Cost & Energy Dashboard](ev_cost1.png)
+![Cost & Energy Dashboard](static/ev_cost.png)
+![Cost & Energy Dashboard](static/ev_cost.png)
 
 ### Route Optimization
 - Intelligent route planning with charging stops
