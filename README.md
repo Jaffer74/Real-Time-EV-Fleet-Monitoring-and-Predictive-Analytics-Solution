@@ -57,6 +57,8 @@ Machine learning-powered analysis using Random Forest Regressor:
 - **Visual Health Indicators:**
   - Green: Good
   - Red: Needs Attention
+  ![Battery](static/ev_battery_good.png)
+  ![Route](static/ev_battery_bad.png)
 
 - **Predictive Maintenance Alerts**
 
