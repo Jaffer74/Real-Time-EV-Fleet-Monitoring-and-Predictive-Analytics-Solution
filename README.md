@@ -206,6 +206,29 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 
 ![Class Diagram](static/ev_class_diagram.png)
 
+## Report Generation
+
+### Generate Customizable Reports
+- **Select Vehicle**: Choose the vehicle for the report.
+- **Report Type**: Select the type of report (Battery Reports, Driver Reports, Maintenance Reports, Cost & Energy Reports).
+- **Date Range**: Select the start and end dates for the report (dd-mm-yyyy).
+- **Generate Report**: Button to generate the report based on the selected options.
+
+### Total Reports Generated
+- Displays the total number of reports generated.
+
+### Downloaded Reports History
+| Date & Time | Vehicle | Report Type | Status (Success/Failure) | Action (Download Link) |
+|-------------|---------|-------------|--------------------------|------------------------|
+| dd-mm-yyyy  | Vehicle Name | Report Type | Success/Failure         | [Download Link]         |
+
+### Save Reports as PDF
+- The generated reports are saved in PDF format, which can be downloaded from the history section.
+![Report](static/ev_report3.png)
+![Report](static/ev_report1.png)
+![Report](static/ev_report2.png)
+
+
 </details>
 
 ---
