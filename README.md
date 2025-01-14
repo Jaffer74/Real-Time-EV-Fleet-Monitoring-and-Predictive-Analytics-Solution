@@ -81,6 +81,7 @@ ev-fleet-monitoring/
 ├── battery_data.csv
 ├── battery_health_model.pkl
 ├── requirements.txt
+├── class_diagram_ev.png
 ├── README.md
 └── LICENSE.md
 ```
@@ -174,9 +175,15 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 
 ![Vehicle Monitoring](link-to-image)
 
+### Class Diagram
+- The class diagram represents the structure of the EV fleet monitoring system, showcasing key classes and their relationships.
+- It includes classes for vehicles, drivers, maintenance schedules, route optimization, and battery health prediction.
+
+![Class Diagram](link-to-class-diagram-image)
+
 </details>
 
 ---
-## 📄 License
+### 📄 License
 This project is licensed under the MIT License - see the `LICENSE.md` file for details.
 ---
