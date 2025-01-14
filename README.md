@@ -46,6 +46,7 @@ A state-of-the-art electric vehicle (EV) fleet management system designed to rev
 
 ### 🔋 Battery Health Prediction
 Machine learning-powered analysis using Random Forest Regressor:
+*The `battery_health_model.pkl` file is used after performing Random Forest Regressor to predict battery health and generate maintenance alerts.*
 
 - **Input Features:**
   - Capacity (mAh)
@@ -59,10 +60,6 @@ Machine learning-powered analysis using Random Forest Regressor:
   - Red: Needs Attention
   ![Battery](static/ev_battery_good.png)
   ![Route](static/ev_battery_bad.png)
-
-- **Predictive Maintenance Alerts**
-
-*The `battery_health_model.pkl` file is used after performing Random Forest Regressor to predict battery health and generate maintenance alerts.*
 
 ---
 
