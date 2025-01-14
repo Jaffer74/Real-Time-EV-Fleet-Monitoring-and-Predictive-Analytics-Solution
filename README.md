@@ -175,7 +175,7 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 - Charging station locator with real-time updates
 - Displays dynamic routes and charging stop recommendations with images saved inside the `static` folder for visual reference
 
-![Route Optimization](static/route_optimization_image.jpg)
+![Route Optimization](static/ev_route_map1.png)
 
 ### Driver Maintenance
 - Real-time Driver Score
