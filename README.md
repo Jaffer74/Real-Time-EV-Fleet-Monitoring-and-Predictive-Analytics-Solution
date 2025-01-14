@@ -191,13 +191,14 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 - Active Points Tracking
 - Revenue Analysis
 
-![Vehicle Monitoring](link-to-image)
+![Vehicle Monitoring](static/vehicle.png)
+![Vehicle Monitoring](static/vehicle1.png)
 
 ### Class Diagram
 - The class diagram represents the structure of the EV fleet monitoring system, showcasing key classes and their relationships.
 - It includes classes for vehicles, drivers, maintenance schedules, route optimization, and battery health prediction.
 
-![Class Diagram](link-to-class-diagram-image)
+![Class Diagram](static/ev_class_diagram.png)
 
 </details>
 
