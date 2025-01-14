@@ -1,6 +1,7 @@
 # Real-Time EV Fleet Monitoring and Predictive Analytics Solution 🚗⚡
 
 A state-of-the-art electric vehicle (EV) fleet management system designed to revolutionize how fleet managers monitor, analyze, and optimize their electric vehicle operations. Built with modern web technologies and powered by machine learning. 🌟
+![Dashboard](static/route_optimization_image.jpg)
 
 ## 📑 Table of Contents
 - [Features](#features)
