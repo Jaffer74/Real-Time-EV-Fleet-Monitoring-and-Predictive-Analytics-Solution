@@ -200,12 +200,6 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 ![Vehicle Monitoring](static/vehicle.png)
 ![Vehicle Monitoring](static/vehicle1.png)
 
-### Class Diagram
-- The class diagram represents the structure of the EV fleet monitoring system, showcasing key classes and their relationships.
-- It includes classes for vehicles, drivers, maintenance schedules, route optimization, and battery health prediction.
-
-![Class Diagram](static/ev_class_diagram.png)
-
 ## Report Generation
 
 ### Generate Customizable Reports
@@ -226,9 +220,14 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 - The generated reports are saved in PDF format, which can be downloaded from the history section.
 ![Report](static/ev_report3.png)
 ![Report](static/ev_report1.png)
+- Below is the pdf generated and saved Image.
 ![Report](static/ev_report2.png)
 
+### Class Diagram
+- The class diagram represents the structure of the EV fleet monitoring system, showcasing key classes and their relationships.
+- It includes classes for vehicles, drivers, maintenance schedules, route optimization, and battery health prediction.
 
+![Class Diagram](static/ev_class_diagram.png)
 </details>
 
 ---
