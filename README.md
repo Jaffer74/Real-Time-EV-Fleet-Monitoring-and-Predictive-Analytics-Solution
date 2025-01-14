@@ -175,6 +175,7 @@ GEOCODE_BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
 ![Vehicle Monitoring](link-to-image)
 
 </details>
+
 ---
 ## 📄 License
 This project is licensed under the MIT License - see the `LICENSE.md` file for details.
