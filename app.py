@@ -7,8 +7,6 @@ from sklearn.ensemble import RandomForestRegressor
 import pickle
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
-from waitress import serve
-from app import app
 import requests
 from flask import Flask, request, jsonify
 from datetime import datetime
