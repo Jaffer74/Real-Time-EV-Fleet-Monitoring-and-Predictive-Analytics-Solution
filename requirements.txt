@@ -10,13 +10,14 @@ debugpy==1.8.9
 decorator==5.1.1
 exceptiongroup==1.2.2
 executing==2.1.0
-Flask==3.1.0
+Flask==2.2.0
 Flask-Mail==0.10.0
 Flask-SQLAlchemy==3.1.1
 folium==0.19.0
 geographiclib==2.0
 geopy==2.4.1
 greenlet==3.1.1
+gunicorn>=20.0.4
 idna==3.10
 ipykernel==6.29.5
 ipython==8.30.0
@@ -41,7 +42,7 @@ psutil==6.1.0
 pure_eval==0.2.3
 Pygments==2.18.0
 python-dateutil==2.9.0.post0
-pytz==2024.2
+pytz>=2024.2
 pyzmq==26.2.0
 requests==2.32.3
 scikit-learn==1.5.2
