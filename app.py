@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import random
-
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
@@ -9,6 +8,7 @@ import pickle
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 from waitress import serve
+from app import app
 import requests
 from flask import Flask, request, jsonify
 from datetime import datetime
