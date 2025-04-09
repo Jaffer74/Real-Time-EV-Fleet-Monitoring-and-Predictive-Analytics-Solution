@@ -30,9 +30,7 @@ A state-of-the-art electric vehicle (EV) fleet management system designed to rev
 </div>
 
 ![Login](static/ev_welcome.png)
-- Below, Images stating, Proper Form Validation
-![Login](static/ev_login.png)
-![Login](static/ev_registration.png)
+
 
 ### 🚙 Vehicle Registration & Monitoring
 - Comprehensive vehicle registration system
